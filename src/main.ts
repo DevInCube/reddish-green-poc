@@ -22,17 +22,28 @@ class PaletteCell
         this.position = {x, y};
     }
 
-    isHover(x: number, y: number) {
-        return (x >= this.position.x && x <= this.position.x + PaletteCell.size
-            && y >= this.position.y && y <= this.position.y + PaletteCell.size);
+    isHover(mx: number, my: number) {
+        let isHoverSide = (side: number) => {
+            let x = this.position.x + (!side ? 0 : width);
+            return (mx >= x && mx <= x + PaletteCell.size
+                && my >= this.position.y && my <= this.position.y + PaletteCell.size);
+        }
+
+        return isHoverSide(0) || isHoverSide(1);
     }
 
-    draw(context: CanvasRenderingContext2D, side: number) {
+    draw(context: CanvasRenderingContext2D) {
         context.fillStyle = this.color;
         context.strokeStyle = "black";
-        let x = this.position.x + (!side ? 0 : width);
-        context.fillRect(x, this.position.y, PaletteCell.size, PaletteCell.size); 
-        context.strokeRect(x, this.position.y, PaletteCell.size, PaletteCell.size);
+
+        drawSide(this, 0);
+        drawSide(this, 1);
+        
+        function drawSide(athis: PaletteCell, side: number) {
+            let x = athis.position.x + (!side ? 0 : width);
+            context.fillRect(x, athis.position.y, PaletteCell.size, PaletteCell.size); 
+            context.strokeRect(x, athis.position.y, PaletteCell.size, PaletteCell.size);
+        }
     }
 }
 
@@ -43,10 +54,10 @@ let colors = ["yellow", "red", "cyan", "lightgreen", "green", "lightsteelblue", 
 let cells = colors.map((c, i) => new PaletteCell(padding + i * (PaletteCell.size + 10), padding, c));
 
 for (let c of cells) {
-    c.draw(ctx, 0);
-    c.draw(ctx, 1);
+    c.draw(ctx);
 }
 
+let size = 10;
 let leftColor = 'green';
 let rightColor = leftColor;
 
@@ -96,6 +107,12 @@ canvas.addEventListener("mouseup", e => {
     mousePressed = false;
 })
 
+canvas.addEventListener("wheel", e => {
+    size -= e.deltaY;
+    if (size < 1) size = 1;
+    else if (size > 50) size = 50;
+});
+
 function drawLine(x1: number, y1: number, x2: number, y2: number) {
     _drawLine(x1 % width, y1, x2 % width, y2, leftColor);
     _drawLine(x1 % width + width, y1, x2 % width + width, y2, rightColor);
@@ -103,8 +120,8 @@ function drawLine(x1: number, y1: number, x2: number, y2: number) {
 
 function _drawLine(x1: number, y1: number, x2: number, y2: number, color: string) {
     ctx.strokeStyle = color;
+    ctx.lineWidth = size;
     ctx.lineJoin = "round";
-    ctx.lineWidth = 10;
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);

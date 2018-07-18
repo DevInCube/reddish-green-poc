@@ -64,15 +64,15 @@ System.register("main", [], function (exports_3, context_3) {
     }
     function _drawLine(x1, y1, x2, y2, color) {
         ctx.strokeStyle = color;
+        ctx.lineWidth = size;
         ctx.lineJoin = "round";
-        ctx.lineWidth = 10;
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
         ctx.closePath();
         ctx.stroke();
     }
-    var canvas, ctx, width, mousePressed, PaletteCell, padding, colors, cells, leftColor, rightColor, lastX, lastY;
+    var canvas, ctx, width, mousePressed, PaletteCell, padding, colors, cells, size, leftColor, rightColor, lastX, lastY;
     return {
         setters: [],
         execute: function () {
@@ -87,16 +87,24 @@ System.register("main", [], function (exports_3, context_3) {
                     this.color = c;
                     this.position = { x, y };
                 }
-                isHover(x, y) {
-                    return (x >= this.position.x && x <= this.position.x + PaletteCell.size
-                        && y >= this.position.y && y <= this.position.y + PaletteCell.size);
+                isHover(mx, my) {
+                    let isHoverSide = (side) => {
+                        let x = this.position.x + (!side ? 0 : width);
+                        return (mx >= x && mx <= x + PaletteCell.size
+                            && my >= this.position.y && my <= this.position.y + PaletteCell.size);
+                    };
+                    return isHoverSide(0) || isHoverSide(1);
                 }
-                draw(context, side) {
+                draw(context) {
                     context.fillStyle = this.color;
                     context.strokeStyle = "black";
-                    let x = this.position.x + (!side ? 0 : width);
-                    context.fillRect(x, this.position.y, PaletteCell.size, PaletteCell.size);
-                    context.strokeRect(x, this.position.y, PaletteCell.size, PaletteCell.size);
+                    drawSide(this, 0);
+                    drawSide(this, 1);
+                    function drawSide(athis, side) {
+                        let x = athis.position.x + (!side ? 0 : width);
+                        context.fillRect(x, athis.position.y, PaletteCell.size, PaletteCell.size);
+                        context.strokeRect(x, athis.position.y, PaletteCell.size, PaletteCell.size);
+                    }
                 }
             };
             PaletteCell.size = 50;
@@ -104,9 +112,9 @@ System.register("main", [], function (exports_3, context_3) {
             colors = ["yellow", "red", "cyan", "lightgreen", "green", "lightsteelblue", "blue", "black", "white"];
             cells = colors.map((c, i) => new PaletteCell(padding + i * (PaletteCell.size + 10), padding, c));
             for (let c of cells) {
-                c.draw(ctx, 0);
-                c.draw(ctx, 1);
+                c.draw(ctx);
             }
+            size = 10;
             leftColor = 'green';
             rightColor = leftColor;
             lastX = 0;
@@ -146,6 +154,13 @@ System.register("main", [], function (exports_3, context_3) {
                     return;
                 }
                 mousePressed = false;
+            });
+            canvas.addEventListener("wheel", e => {
+                size -= e.deltaY;
+                if (size < 1)
+                    size = 1;
+                else if (size > 50)
+                    size = 50;
             });
         }
     };
