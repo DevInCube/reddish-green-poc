@@ -11,7 +11,8 @@ let mousePressed = false;
 
 class PaletteCell 
 {
-    static size = 50;
+    static size = 1;
+    static height = 50;
 
     color: string
     position: {x:number, y: number}
@@ -25,7 +26,7 @@ class PaletteCell
         let isHoverSide = (side: number) => {
             let x = this.position.x + (!side ? 0 : width);
             return (mx >= x && mx <= x + PaletteCell.size
-                && my >= this.position.y && my <= this.position.y + PaletteCell.size);
+                && my >= this.position.y && my <= this.position.y + PaletteCell.height);
         }
 
         return isHoverSide(0) || isHoverSide(1);
@@ -40,17 +41,19 @@ class PaletteCell
         
         function drawSide(athis: PaletteCell, side: number) {
             let x = athis.position.x + (!side ? 0 : width);
-            context.fillRect(x, athis.position.y, PaletteCell.size, PaletteCell.size); 
-            context.strokeRect(x, athis.position.y, PaletteCell.size, PaletteCell.size);
+            context.fillRect(x, athis.position.y, PaletteCell.size, PaletteCell.height); 
         }
     }
 }
 
 const padding = 10;
 
-let colors = ["yellow", "red", "cyan", "lightgreen", "green", "lightsteelblue", "blue", "black", "white"];
+const colors = [];
+for (let hue = 0; hue < 360; hue += 1) {
+    colors.push(`hsl(${hue}, 100%, 50%)`);
+}
 
-let cells = colors.map((c, i) => new PaletteCell(padding + i * (PaletteCell.size + 10), padding, c));
+let cells = colors.map((c, i) => new PaletteCell(padding + (i * PaletteCell.size), padding, c));
 
 for (let c of cells) {
     c.draw(ctx);
