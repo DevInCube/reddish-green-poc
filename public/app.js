@@ -1,34 +1,6 @@
-System.register("utils/misc", [], function (exports_1, context_1) {
-    var __moduleName = context_1 && context_1.id;
-    function isVisible(elt) {
-        const style = window.getComputedStyle(elt);
-        return (style.width !== null && +style.width !== 0)
-            && (style.height !== null && +style.height !== 0)
-            && (style.opacity !== null && +style.opacity !== 0)
-            && style.display !== "none"
-            && style.visibility !== "hidden";
-    }
-    exports_1("isVisible", isVisible);
-    function adjust(x, ...applyAdjustmentList) {
-        for (const applyAdjustment of applyAdjustmentList) {
-            applyAdjustment(x);
-        }
-        return x;
-    }
-    exports_1("adjust", adjust);
-    function getRandomElement(array) {
-        return array[Math.floor(Math.random() * array.length)];
-    }
-    exports_1("getRandomElement", getRandomElement);
-    return {
-        setters: [],
-        execute: function () {
-        }
-    };
-});
 // https://en.wikipedia.org/wiki/Lehmer_random_number_generator
-System.register("utils/Random", [], function (exports_2, context_2) {
-    var __moduleName = context_2 && context_2.id;
+System.register("utils/Random", [], function (exports_1, context_1) {
+    var __moduleName = context_1 && context_1.id;
     var MAX_INT32, MINSTD, Random;
     return {
         setters: [],
@@ -52,12 +24,12 @@ System.register("utils/Random", [], function (exports_2, context_2) {
                     return (this.next() - 1) / (MAX_INT32 - 1);
                 }
             };
-            exports_2("Random", Random);
+            exports_1("Random", Random);
         }
     };
 });
-System.register("main", [], function (exports_3, context_3) {
-    var __moduleName = context_3 && context_3.id;
+System.register("main", [], function (exports_2, context_2) {
+    var __moduleName = context_2 && context_2.id;
     function drawLine(x1, y1, x2, y2) {
         _drawLine(x1 % width, y1, x2 % width, y2, leftColor);
         _drawLine(x1 % width + width, y1, x2 % width + width, y2, rightColor);
@@ -119,7 +91,7 @@ System.register("main", [], function (exports_3, context_3) {
             rightColor = leftColor;
             lastX = 0;
             lastY = 0;
-            canvas.addEventListener("mousedown", e => {
+            canvas.addEventListener("pointerdown", e => {
                 let x = e.offsetX;
                 let y = e.offsetY;
                 let cell = cells.find(c => c.isHover(x, y));
@@ -134,7 +106,7 @@ System.register("main", [], function (exports_3, context_3) {
                 lastX = x;
                 lastY = y;
             });
-            canvas.addEventListener("mousemove", e => {
+            canvas.addEventListener("pointermove", e => {
                 if (mousePressed) {
                     let x = e.offsetX;
                     let y = e.offsetY;
@@ -143,7 +115,7 @@ System.register("main", [], function (exports_3, context_3) {
                     lastY = y;
                 }
             });
-            canvas.addEventListener("mouseup", e => {
+            canvas.addEventListener("pointerup", e => {
                 let x = e.offsetX;
                 let y = e.offsetY;
                 let cell = cells.find(c => c.isHover(x, y));
@@ -165,8 +137,8 @@ System.register("main", [], function (exports_3, context_3) {
         }
     };
 });
-System.register("utils/imageData", [], function (exports_4, context_4) {
-    var __moduleName = context_4 && context_4.id;
+System.register("utils/imageData", [], function (exports_3, context_3) {
+    var __moduleName = context_3 && context_3.id;
     function setPixelI(imageData, i, r, g, b, a = 1) {
         // tslint:disable-next-line:no-bitwise
         const offset = i << 2;
@@ -175,27 +147,55 @@ System.register("utils/imageData", [], function (exports_4, context_4) {
         imageData.data[offset + 2] = b;
         imageData.data[offset + 3] = a;
     }
-    exports_4("setPixelI", setPixelI);
+    exports_3("setPixelI", setPixelI);
     function scaleNorm(v) {
         return Math.floor(v * almost256);
     }
     function setPixelNormI(imageData, i, r, g, b, a = 1) {
         setPixelI(imageData, i, scaleNorm(r), scaleNorm(g), scaleNorm(b), scaleNorm(a));
     }
-    exports_4("setPixelNormI", setPixelNormI);
+    exports_3("setPixelNormI", setPixelNormI);
     function setPixelXY(imageData, x, y, r, g, b, a = 255) {
         setPixelI(imageData, y * imageData.width + x, r, g, b, a);
     }
-    exports_4("setPixelXY", setPixelXY);
+    exports_3("setPixelXY", setPixelXY);
     function setPixelNormXY(imageData, x, y, r, g, b, a = 1) {
         setPixelNormI(imageData, y * imageData.width + x, r, g, b, a);
     }
-    exports_4("setPixelNormXY", setPixelNormXY);
+    exports_3("setPixelNormXY", setPixelNormXY);
     var almost256;
     return {
         setters: [],
         execute: function () {
             almost256 = 256 - Number.MIN_VALUE;
+        }
+    };
+});
+System.register("utils/misc", [], function (exports_4, context_4) {
+    var __moduleName = context_4 && context_4.id;
+    function isVisible(elt) {
+        const style = window.getComputedStyle(elt);
+        return (style.width !== null && +style.width !== 0)
+            && (style.height !== null && +style.height !== 0)
+            && (style.opacity !== null && +style.opacity !== 0)
+            && style.display !== "none"
+            && style.visibility !== "hidden";
+    }
+    exports_4("isVisible", isVisible);
+    function adjust(x, ...applyAdjustmentList) {
+        for (const applyAdjustment of applyAdjustmentList) {
+            applyAdjustment(x);
+        }
+        return x;
+    }
+    exports_4("adjust", adjust);
+    function getRandomElement(array) {
+        return array[Math.floor(Math.random() * array.length)];
+    }
+    exports_4("getRandomElement", getRandomElement);
+    return {
+        setters: [],
+        execute: function () {
         }
     };
 });

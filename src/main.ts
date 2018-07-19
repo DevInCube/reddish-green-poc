@@ -9,7 +9,6 @@ let width = canvas.width / 2;
 
 let mousePressed = false;
 
-
 class PaletteCell 
 {
     static size = 50;
@@ -63,7 +62,7 @@ let rightColor = leftColor;
 
 let lastX = 0;
 let lastY = 0;
-canvas.addEventListener("mousedown", e => {
+canvas.addEventListener("pointerdown", e => {
 
     let x = e.offsetX;
     let y = e.offsetY;
@@ -83,7 +82,7 @@ canvas.addEventListener("mousedown", e => {
     lastY = y;
 });
 
-canvas.addEventListener("mousemove", e => {
+canvas.addEventListener("pointermove", e => {
     if (mousePressed) {
         let x = e.offsetX;
         let y = e.offsetY;
@@ -93,7 +92,7 @@ canvas.addEventListener("mousemove", e => {
     }
 });
 
-canvas.addEventListener("mouseup", e => {
+canvas.addEventListener("pointerup", e => {
     let x = e.offsetX;
     let y = e.offsetY;
     let cell = cells.find(c => c.isHover(x, y));
