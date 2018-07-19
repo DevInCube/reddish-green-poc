@@ -107,9 +107,10 @@ canvas.addEventListener("pointerup", e => {
 })
 
 canvas.addEventListener("wheel", e => {
-    size -= e.deltaY;
+    size -= Math.sign(e.deltaY);
     if (size < 1) size = 1;
     else if (size > 50) size = 50;
+    e.preventDefault();
 });
 
 function drawLine(x1: number, y1: number, x2: number, y2: number) {

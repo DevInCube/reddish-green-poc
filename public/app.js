@@ -128,11 +128,12 @@ System.register("main", [], function (exports_2, context_2) {
                 mousePressed = false;
             });
             canvas.addEventListener("wheel", e => {
-                size -= e.deltaY;
+                size -= Math.sign(e.deltaY);
                 if (size < 1)
                     size = 1;
                 else if (size > 50)
                     size = 50;
+                e.preventDefault();
             });
         }
     };
