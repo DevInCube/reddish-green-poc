@@ -9,10 +9,10 @@ let width = canvas.width / 2;
 
 let mousePressed = false;
 
-
 class PaletteCell 
 {
-    static size = 50;
+    static size = 1;
+    static height = 5;
 
     color: string
     position: {x:number, y: number}
@@ -26,7 +26,7 @@ class PaletteCell
         let isHoverSide = (side: number) => {
             let x = this.position.x + (!side ? 0 : width);
             return (mx >= x && mx <= x + PaletteCell.size
-                && my >= this.position.y && my <= this.position.y + PaletteCell.size);
+                && my >= this.position.y && my <= this.position.y + PaletteCell.height);
         }
 
         return isHoverSide(0) || isHoverSide(1);
@@ -41,21 +41,58 @@ class PaletteCell
         
         function drawSide(athis: PaletteCell, side: number) {
             let x = athis.position.x + (!side ? 0 : width);
-            context.fillRect(x, athis.position.y, PaletteCell.size, PaletteCell.size); 
-            context.strokeRect(x, athis.position.y, PaletteCell.size, PaletteCell.size);
+            context.fillRect(x, athis.position.y, PaletteCell.size, PaletteCell.height); 
         }
     }
 }
 
 const padding = 10;
 
-let colors = ["yellow", "red", "cyan", "lightgreen", "green", "lightsteelblue", "blue", "black", "white"];
+const colors = [];
+for (let lightness = 0; lightness <= 100; lightness += 10) {
+    for (let hue = 0; hue < 360; hue += 1) {
+        colors.push(`hsl(${hue}, 100%, ${lightness}%)`);
+    }
+}
 
-let cells = colors.map((c, i) => new PaletteCell(padding + i * (PaletteCell.size + 10), padding, c));
+let cells = colors.map((c, i) => new PaletteCell(
+    padding + ((i % 360) * PaletteCell.size),
+    padding + (Math.floor(i / 360) * PaletteCell.height), c));
 
 for (let c of cells) {
     c.draw(ctx);
 }
+
+ctx.strokeStyle = "#bbb";
+ctx.lineWidth = 1;
+ctx.strokeRect(padding, padding, 360 * PaletteCell.size, Math.floor((cells.length / 360) * PaletteCell.height));
+ctx.strokeRect(width + padding, padding, 360 * PaletteCell.size, Math.floor((cells.length / 360) * PaletteCell.height));
+
+ctx.beginPath();
+ctx.moveTo(width / 2 - 100, canvas.height / 2);
+ctx.lineTo(width / 2 + 100, canvas.height / 2);
+ctx.closePath();
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(width / 2, canvas.height / 2 - 100);
+ctx.lineTo(width / 2, canvas.height / 2 + 100);
+ctx.closePath();
+ctx.stroke();
+ctx.strokeRect(width / 2 - 100 - 20, canvas.height / 2 - 20, 40, 40);
+ctx.strokeRect(width / 2 + 100 - 20, canvas.height / 2 - 20, 40, 40);
+
+ctx.beginPath();
+ctx.moveTo(width + width / 2 - 100, canvas.height / 2);
+ctx.lineTo(width + width / 2 + 100, canvas.height / 2);
+ctx.closePath();
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(width + width / 2, canvas.height / 2 - 100);
+ctx.lineTo(width + width / 2, canvas.height / 2 + 100);
+ctx.closePath();
+ctx.stroke();
+ctx.strokeRect(width + width / 2 - 100 - 20, canvas.height / 2 - 20, 40, 40);
+ctx.strokeRect(width + width / 2 + 100 - 20, canvas.height / 2 - 20, 40, 40);
 
 let size = 10;
 let leftColor = 'green';
@@ -63,7 +100,7 @@ let rightColor = leftColor;
 
 let lastX = 0;
 let lastY = 0;
-canvas.addEventListener("mousedown", e => {
+canvas.addEventListener("pointerdown", e => {
 
     let x = e.offsetX;
     let y = e.offsetY;
@@ -83,7 +120,7 @@ canvas.addEventListener("mousedown", e => {
     lastY = y;
 });
 
-canvas.addEventListener("mousemove", e => {
+canvas.addEventListener("pointermove", e => {
     if (mousePressed) {
         let x = e.offsetX;
         let y = e.offsetY;
@@ -93,7 +130,7 @@ canvas.addEventListener("mousemove", e => {
     }
 });
 
-canvas.addEventListener("mouseup", e => {
+canvas.addEventListener("pointerup", e => {
     let x = e.offsetX;
     let y = e.offsetY;
     let cell = cells.find(c => c.isHover(x, y));
@@ -108,9 +145,10 @@ canvas.addEventListener("mouseup", e => {
 })
 
 canvas.addEventListener("wheel", e => {
-    size -= e.deltaY;
+    size -= Math.sign(e.deltaY);
     if (size < 1) size = 1;
     else if (size > 50) size = 50;
+    e.preventDefault();
 });
 
 function drawLine(x1: number, y1: number, x2: number, y2: number) {
