@@ -1,7 +1,7 @@
 // https://en.wikipedia.org/wiki/Lehmer_random_number_generator
 System.register("utils/Random", [], function (exports_1, context_1) {
-    var __moduleName = context_1 && context_1.id;
     var MAX_INT32, MINSTD, Random;
+    var __moduleName = context_1 && context_1.id;
     return {
         setters: [],
         execute: function () {// https://en.wikipedia.org/wiki/Lehmer_random_number_generator
@@ -29,7 +29,42 @@ System.register("utils/Random", [], function (exports_1, context_1) {
     };
 });
 System.register("main", [], function (exports_2, context_2) {
+    var controls, controlsCtx, canvas, ctx, width, mousePressed, PaletteCell, padding, colors, cells, size, leftColor, rightColor, lastX, lastY;
     var __moduleName = context_2 && context_2.id;
+    function drawExtraLines(ctx) {
+        ctx.strokeStyle = "#bbb";
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.7;
+        // palette borders
+        ctx.strokeRect(padding, padding, 360 * PaletteCell.size, Math.floor((cells.length / 360) * PaletteCell.height));
+        ctx.strokeRect(width + padding, padding, 360 * PaletteCell.size, Math.floor((cells.length / 360) * PaletteCell.height));
+        // left cross
+        ctx.beginPath();
+        ctx.moveTo(width / 2 - 100, canvas.height / 2);
+        ctx.lineTo(width / 2 + 100, canvas.height / 2);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(width / 2, canvas.height / 2 - 100);
+        ctx.lineTo(width / 2, canvas.height / 2 + 100);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.strokeRect(width / 2 - 100 - 20, canvas.height / 2 - 20, 40, 40);
+        ctx.strokeRect(width / 2 + 100 - 20, canvas.height / 2 - 20, 40, 40);
+        // right cross
+        ctx.beginPath();
+        ctx.moveTo(width + width / 2 - 100, canvas.height / 2);
+        ctx.lineTo(width + width / 2 + 100, canvas.height / 2);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(width + width / 2, canvas.height / 2 - 100);
+        ctx.lineTo(width + width / 2, canvas.height / 2 + 100);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.strokeRect(width + width / 2 - 100 - 20, canvas.height / 2 - 20, 40, 40);
+        ctx.strokeRect(width + width / 2 + 100 - 20, canvas.height / 2 - 20, 40, 40);
+    }
     function drawLine(x1, y1, x2, y2) {
         _drawLine(x1 % width, y1, x2 % width, y2, leftColor);
         _drawLine(x1 % width + width, y1, x2 % width + width, y2, rightColor);
@@ -44,10 +79,13 @@ System.register("main", [], function (exports_2, context_2) {
         ctx.closePath();
         ctx.stroke();
     }
-    var canvas, ctx, width, mousePressed, PaletteCell, padding, colors, cells, size, leftColor, rightColor, lastX, lastY;
     return {
         setters: [],
         execute: function () {
+            controls = document.getElementById("controls");
+            controls.width = controls.clientWidth;
+            controls.height = controls.clientHeight;
+            controlsCtx = controls.getContext("2d");
             canvas = document.getElementById("canvas");
             canvas.width = canvas.clientWidth;
             canvas.height = canvas.clientHeight;
@@ -89,36 +127,10 @@ System.register("main", [], function (exports_2, context_2) {
             }
             cells = colors.map((c, i) => new PaletteCell(padding + ((i % 360) * PaletteCell.size), padding + (Math.floor(i / 360) * PaletteCell.height), c));
             for (let c of cells) {
-                c.draw(ctx);
+                controlsCtx.globalAlpha = 1;
+                c.draw(controlsCtx);
             }
-            ctx.strokeStyle = "#bbb";
-            ctx.lineWidth = 1;
-            ctx.strokeRect(padding, padding, 360 * PaletteCell.size, Math.floor((cells.length / 360) * PaletteCell.height));
-            ctx.strokeRect(width + padding, padding, 360 * PaletteCell.size, Math.floor((cells.length / 360) * PaletteCell.height));
-            ctx.beginPath();
-            ctx.moveTo(width / 2 - 100, canvas.height / 2);
-            ctx.lineTo(width / 2 + 100, canvas.height / 2);
-            ctx.closePath();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(width / 2, canvas.height / 2 - 100);
-            ctx.lineTo(width / 2, canvas.height / 2 + 100);
-            ctx.closePath();
-            ctx.stroke();
-            ctx.strokeRect(width / 2 - 100 - 20, canvas.height / 2 - 20, 40, 40);
-            ctx.strokeRect(width / 2 + 100 - 20, canvas.height / 2 - 20, 40, 40);
-            ctx.beginPath();
-            ctx.moveTo(width + width / 2 - 100, canvas.height / 2);
-            ctx.lineTo(width + width / 2 + 100, canvas.height / 2);
-            ctx.closePath();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(width + width / 2, canvas.height / 2 - 100);
-            ctx.lineTo(width + width / 2, canvas.height / 2 + 100);
-            ctx.closePath();
-            ctx.stroke();
-            ctx.strokeRect(width + width / 2 - 100 - 20, canvas.height / 2 - 20, 40, 40);
-            ctx.strokeRect(width + width / 2 + 100 - 20, canvas.height / 2 - 20, 40, 40);
+            drawExtraLines(controlsCtx);
             size = 10;
             leftColor = 'green';
             rightColor = leftColor;
@@ -172,6 +184,7 @@ System.register("main", [], function (exports_2, context_2) {
     };
 });
 System.register("utils/imageData", [], function (exports_3, context_3) {
+    var almost256;
     var __moduleName = context_3 && context_3.id;
     function setPixelI(imageData, i, r, g, b, a = 1) {
         // tslint:disable-next-line:no-bitwise
@@ -197,7 +210,6 @@ System.register("utils/imageData", [], function (exports_3, context_3) {
         setPixelNormI(imageData, y * imageData.width + x, r, g, b, a);
     }
     exports_3("setPixelNormXY", setPixelNormXY);
-    var almost256;
     return {
         setters: [],
         execute: function () {

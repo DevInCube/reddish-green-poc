@@ -1,5 +1,10 @@
 import { Random } from "./utils/Random";
 
+const controls = document.getElementById("controls") as HTMLCanvasElement;
+controls.width = controls.clientWidth;
+controls.height = controls.clientHeight;
+const controlsCtx = controls.getContext("2d")!;
+
 let canvas = document.getElementById("canvas") as HTMLCanvasElement;
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
@@ -9,17 +14,16 @@ let width = canvas.width / 2;
 
 let mousePressed = false;
 
-class PaletteCell 
-{
+class PaletteCell {
     static size = 1;
     static height = 5;
 
     color: string
-    position: {x:number, y: number}
+    position: { x: number, y: number }
 
     constructor(x: number, y: number, c: string) {
         this.color = c;
-        this.position = {x, y};
+        this.position = { x, y };
     }
 
     isHover(mx: number, my: number) {
@@ -38,10 +42,10 @@ class PaletteCell
 
         drawSide(this, 0);
         drawSide(this, 1);
-        
+
         function drawSide(athis: PaletteCell, side: number) {
             let x = athis.position.x + (!side ? 0 : width);
-            context.fillRect(x, athis.position.y, PaletteCell.size, PaletteCell.height); 
+            context.fillRect(x, athis.position.y, PaletteCell.size, PaletteCell.height);
         }
     }
 }
@@ -60,39 +64,48 @@ let cells = colors.map((c, i) => new PaletteCell(
     padding + (Math.floor(i / 360) * PaletteCell.height), c));
 
 for (let c of cells) {
-    c.draw(ctx);
+    controlsCtx.globalAlpha = 1;
+    c.draw(controlsCtx);
 }
 
-ctx.strokeStyle = "#bbb";
-ctx.lineWidth = 1;
-ctx.strokeRect(padding, padding, 360 * PaletteCell.size, Math.floor((cells.length / 360) * PaletteCell.height));
-ctx.strokeRect(width + padding, padding, 360 * PaletteCell.size, Math.floor((cells.length / 360) * PaletteCell.height));
+drawExtraLines(controlsCtx);
 
-ctx.beginPath();
-ctx.moveTo(width / 2 - 100, canvas.height / 2);
-ctx.lineTo(width / 2 + 100, canvas.height / 2);
-ctx.closePath();
-ctx.stroke();
-ctx.beginPath();
-ctx.moveTo(width / 2, canvas.height / 2 - 100);
-ctx.lineTo(width / 2, canvas.height / 2 + 100);
-ctx.closePath();
-ctx.stroke();
-ctx.strokeRect(width / 2 - 100 - 20, canvas.height / 2 - 20, 40, 40);
-ctx.strokeRect(width / 2 + 100 - 20, canvas.height / 2 - 20, 40, 40);
+function drawExtraLines(ctx: CanvasRenderingContext2D) {
+    ctx.strokeStyle = "#bbb";
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.7;
+    // palette borders
+    ctx.strokeRect(padding, padding, 360 * PaletteCell.size, Math.floor((cells.length / 360) * PaletteCell.height));
+    ctx.strokeRect(width + padding, padding, 360 * PaletteCell.size, Math.floor((cells.length / 360) * PaletteCell.height));
 
-ctx.beginPath();
-ctx.moveTo(width + width / 2 - 100, canvas.height / 2);
-ctx.lineTo(width + width / 2 + 100, canvas.height / 2);
-ctx.closePath();
-ctx.stroke();
-ctx.beginPath();
-ctx.moveTo(width + width / 2, canvas.height / 2 - 100);
-ctx.lineTo(width + width / 2, canvas.height / 2 + 100);
-ctx.closePath();
-ctx.stroke();
-ctx.strokeRect(width + width / 2 - 100 - 20, canvas.height / 2 - 20, 40, 40);
-ctx.strokeRect(width + width / 2 + 100 - 20, canvas.height / 2 - 20, 40, 40);
+    // left cross
+    ctx.beginPath();
+    ctx.moveTo(width / 2 - 100, canvas.height / 2);
+    ctx.lineTo(width / 2 + 100, canvas.height / 2);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(width / 2, canvas.height / 2 - 100);
+    ctx.lineTo(width / 2, canvas.height / 2 + 100);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.strokeRect(width / 2 - 100 - 20, canvas.height / 2 - 20, 40, 40);
+    ctx.strokeRect(width / 2 + 100 - 20, canvas.height / 2 - 20, 40, 40);
+
+    // right cross
+    ctx.beginPath();
+    ctx.moveTo(width + width / 2 - 100, canvas.height / 2);
+    ctx.lineTo(width + width / 2 + 100, canvas.height / 2);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(width + width / 2, canvas.height / 2 - 100);
+    ctx.lineTo(width + width / 2, canvas.height / 2 + 100);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.strokeRect(width + width / 2 - 100 - 20, canvas.height / 2 - 20, 40, 40);
+    ctx.strokeRect(width + width / 2 + 100 - 20, canvas.height / 2 - 20, 40, 40);
+}
 
 let size = 10;
 let leftColor = 'green';
@@ -167,5 +180,5 @@ function _drawLine(x1: number, y1: number, x2: number, y2: number, color: string
     ctx.stroke();
 }
 
-    
+
 
