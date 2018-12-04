@@ -1,5 +1,10 @@
 import { Random } from "./utils/Random";
 
+const cursor = document.getElementById("cursor") as HTMLCanvasElement;
+cursor.width = cursor.clientWidth;
+cursor.height = cursor.clientHeight;
+const cursorCtx = cursor.getContext("2d")!;
+
 const controls = document.getElementById("controls") as HTMLCanvasElement;
 controls.width = controls.clientWidth;
 controls.height = controls.clientHeight;
@@ -134,9 +139,10 @@ canvas.addEventListener("pointerdown", e => {
 });
 
 canvas.addEventListener("pointermove", e => {
+    const x = e.offsetX;
+    const y = e.offsetY;
+    drawCursor(x, y);
     if (mousePressed) {
-        let x = e.offsetX;
-        let y = e.offsetY;
         drawLine(lastX, lastY, x, y);
         lastX = x;
         lastY = y;
@@ -161,6 +167,7 @@ canvas.addEventListener("wheel", e => {
     size -= Math.sign(e.deltaY);
     if (size < 1) size = 1;
     else if (size > 50) size = 50;
+    drawCursor(e.offsetX, e.offsetY);
     e.preventDefault();
 });
 
@@ -178,6 +185,20 @@ function _drawLine(x1: number, y1: number, x2: number, y2: number, color: string
     ctx.lineTo(x2, y2);
     ctx.closePath();
     ctx.stroke();
+}
+
+function drawCursor(x1: number, y1: number) {
+    cursorCtx.clearRect(0, 0, cursor.width, cursor.height);
+    _drawCursor(x1 % width, y1, leftColor);
+    _drawCursor(x1 % width + width, y1, rightColor);
+    function _drawCursor(x: number, y: number, color: string) {
+        cursorCtx.strokeStyle = color;
+        cursorCtx.lineWidth = 2;
+        cursorCtx.beginPath();
+        cursorCtx.ellipse(x, y, size / 2, size / 2, 0, 0, 2 * Math.PI);
+        cursorCtx.stroke();
+        cursorCtx.closePath();
+    }
 }
 
 

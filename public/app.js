@@ -29,7 +29,7 @@ System.register("utils/Random", [], function (exports_1, context_1) {
     };
 });
 System.register("main", [], function (exports_2, context_2) {
-    var controls, controlsCtx, canvas, ctx, width, mousePressed, PaletteCell, padding, colors, cells, size, leftColor, rightColor, lastX, lastY;
+    var cursor, cursorCtx, controls, controlsCtx, canvas, ctx, width, mousePressed, PaletteCell, padding, colors, cells, size, leftColor, rightColor, lastX, lastY;
     var __moduleName = context_2 && context_2.id;
     function drawExtraLines(ctx) {
         ctx.strokeStyle = "#bbb";
@@ -79,9 +79,26 @@ System.register("main", [], function (exports_2, context_2) {
         ctx.closePath();
         ctx.stroke();
     }
+    function drawCursor(x1, y1) {
+        cursorCtx.clearRect(0, 0, cursor.width, cursor.height);
+        _drawCursor(x1 % width, y1, leftColor);
+        _drawCursor(x1 % width + width, y1, rightColor);
+        function _drawCursor(x, y, color) {
+            cursorCtx.strokeStyle = color;
+            cursorCtx.lineWidth = 2;
+            cursorCtx.beginPath();
+            cursorCtx.ellipse(x, y, size / 2, size / 2, 0, 0, 2 * Math.PI);
+            cursorCtx.stroke();
+            cursorCtx.closePath();
+        }
+    }
     return {
         setters: [],
         execute: function () {
+            cursor = document.getElementById("cursor");
+            cursor.width = cursor.clientWidth;
+            cursor.height = cursor.clientHeight;
+            cursorCtx = cursor.getContext("2d");
             controls = document.getElementById("controls");
             controls.width = controls.clientWidth;
             controls.height = controls.clientHeight;
@@ -152,9 +169,10 @@ System.register("main", [], function (exports_2, context_2) {
                 lastY = y;
             });
             canvas.addEventListener("pointermove", e => {
+                const x = e.offsetX;
+                const y = e.offsetY;
+                drawCursor(x, y);
                 if (mousePressed) {
-                    let x = e.offsetX;
-                    let y = e.offsetY;
                     drawLine(lastX, lastY, x, y);
                     lastX = x;
                     lastY = y;
@@ -178,6 +196,7 @@ System.register("main", [], function (exports_2, context_2) {
                     size = 1;
                 else if (size > 50)
                     size = 50;
+                drawCursor(e.offsetX, e.offsetY);
                 e.preventDefault();
             });
         }
