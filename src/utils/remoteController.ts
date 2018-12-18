@@ -12,14 +12,7 @@ export default class RemoteController {
             ...options,
             config: {
                 iceServers: [
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    {
-                        "urls": [
-                            "turn:13.250.13.83:3478?transport=udp"
-                        ],
-                        "username": "YzYNCouZM1mhqhmseWk6",
-                        "credential": "YzYNCouZM1mhqhmseWk6"
-                    },
+                    
                 ],
             }
         };
@@ -35,6 +28,8 @@ export default class RemoteController {
                 }
             });
         });
+
+        setInterval(() => conn.send("ping"), 3000);
 
         function randomId() {
             return Math.random().toString(36).substring(14);
