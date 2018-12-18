@@ -39,14 +39,15 @@ System.register("utils/remoteController", [], function (exports_2, context_2) {
                     this.eventListeners = {};
                     //
                     const iceServers = [
-                        { urls: 'stun:stun.sipgate.net:3478' },
+                        { urls: 'stun:stun.l.google.com:19302' },
                         {
                             urls: "turn:13.250.13.83:3478?transport=udp",
                             username: "YzYNCouZM1mhqhmseWk6",
                             credential: "YzYNCouZM1mhqhmseWk6"
                         },
                     ];
-                    options = Object.assign({}, options, { config: { iceServers } });
+                    options = Object.assign({}, options, { config: { iceServers }, iceServers });
+                    alert(iceServers.map(x => x.urls).join('\r\n'));
                     const peer = new Peer(randomId(), options);
                     const conn = peer.connect(id);
                     conn.on('open', () => {

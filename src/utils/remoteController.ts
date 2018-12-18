@@ -9,7 +9,7 @@ export default class RemoteController {
         this.eventListeners = {};
         //
         const iceServers = [
-            { urls: 'stun:stun.sipgate.net:3478' },
+            { urls: 'stun:stun.l.google.com:19302' },
             {
                 urls: "turn:13.250.13.83:3478?transport=udp",
                 username: "YzYNCouZM1mhqhmseWk6",
@@ -19,7 +19,9 @@ export default class RemoteController {
         options = {
             ...options,
             config: {iceServers},
+            iceServers,
         };
+        alert(iceServers.map(x => x.urls).join('\r\n'));
         const peer = new Peer(randomId(), options);
         const conn = peer.connect(id);
         conn.on('open', () => {
