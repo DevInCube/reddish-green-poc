@@ -41,9 +41,9 @@ System.register("utils/remoteController", [], function (exports_2, context_2) {
                     const iceServers = [
                         { urls: 'stun:stun.l.google.com:19302' },
                         {
-                            urls: "turn:13.250.13.83:3478?transport=udp",
-                            username: "YzYNCouZM1mhqhmseWk6",
-                            credential: "YzYNCouZM1mhqhmseWk6"
+                            urls: "turn:turn.anyfirewall.com:443?transport=tcp",
+                            username: "webrtc",
+                            credential: "webrtc"
                         },
                     ];
                     options = Object.assign({}, options, { config: { iceServers }, iceServers });
