@@ -1,4 +1,4 @@
-declare var SimplePeer: any;
+declare var Peer: any;
 
 type EventHandler = (data: any) => void;
 
@@ -13,7 +13,7 @@ export default class RemoteController {
                 { urls: 'stun:stun1.l.google.com:19302' },
             ],
         }};
-        const peer = new SimplePeer(randomId(), options);
+        const peer = new Peer(randomId(), options);
         const conn = peer.connect(id);
         conn.on('open', () => {
             this.__emit(`open`, {});

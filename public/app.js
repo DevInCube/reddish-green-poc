@@ -43,7 +43,7 @@ System.register("utils/remoteController", [], function (exports_2, context_2) {
                                 { urls: 'stun:stun1.l.google.com:19302' },
                             ],
                         } });
-                    const peer = new SimplePeer(randomId(), options);
+                    const peer = new Peer(randomId(), options);
                     const conn = peer.connect(id);
                     conn.on('open', () => {
                         this.__emit(`open`, {});
