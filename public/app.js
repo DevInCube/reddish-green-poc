@@ -38,6 +38,11 @@ System.register("utils/remoteController", [], function (exports_2, context_2) {
                 constructor(id, options) {
                     this.eventListeners = {};
                     //
+                    options = Object.assign({}, options, { config: {
+                            iceServers: [
+                                { urls: 'stun:stun1.l.google.com:19302' },
+                            ],
+                        } });
                     const peer = new Peer(randomId(), options);
                     const conn = peer.connect(id);
                     conn.on('open', () => {

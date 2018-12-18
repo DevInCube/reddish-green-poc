@@ -8,6 +8,11 @@ export default class RemoteController {
     constructor(id: string, options: any) {
         this.eventListeners = {}; 
         //
+        options = {...options, config: {
+            iceServers: [
+                { urls: 'stun:stun1.l.google.com:19302' },
+            ],
+        }};
         const peer = new Peer(randomId(), options);
         const conn = peer.connect(id);
         conn.on('open', () => {
