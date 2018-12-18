@@ -47,7 +47,7 @@ System.register("utils/remoteController", [], function (exports_2, context_2) {
                         },
                     ];
                     options = Object.assign({}, options, { config: { iceServers }, iceServers });
-                    alert(iceServers.map(x => x.urls).join('\r\n'));
+                    //alert(iceServers.map(x => x.urls).join('\r\n'));
                     const peer = new Peer(randomId(), options);
                     const conn = peer.connect(id);
                     conn.on('open', () => {

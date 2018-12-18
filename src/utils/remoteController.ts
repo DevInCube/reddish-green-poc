@@ -21,7 +21,7 @@ export default class RemoteController {
             config: {iceServers},
             iceServers,
         };
-        alert(iceServers.map(x => x.urls).join('\r\n'));
+        //alert(iceServers.map(x => x.urls).join('\r\n'));
         const peer = new Peer(randomId(), options);
         const conn = peer.connect(id);
         conn.on('open', () => {
