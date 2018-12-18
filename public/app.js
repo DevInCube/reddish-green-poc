@@ -38,9 +38,16 @@ System.register("utils/remoteController", [], function (exports_2, context_2) {
                 constructor(id, options) {
                     this.eventListeners = {};
                     //
-                    options = Object.assign({}, options, { config: {
-                            iceServers: [],
-                        } });
+                    options = Object.assign({}, options, { iceServers: [
+                            { urls: 'stun:stun1.l.google.com:19302' },
+                            {
+                                "urls": [
+                                    "turn:13.250.13.83:3478?transport=udp"
+                                ],
+                                "username": "YzYNCouZM1mhqhmseWk6",
+                                "credential": "YzYNCouZM1mhqhmseWk6"
+                            },
+                        ] });
                     const peer = new Peer(randomId(), options);
                     const conn = peer.connect(id);
                     conn.on('open', () => {
