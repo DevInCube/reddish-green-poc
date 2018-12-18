@@ -1,5 +1,23 @@
 import { Random } from "./utils/Random";
 
+import RemoteController from './utils/remoteController';
+
+const url = new URL(window.location.href);
+const remoteControllerId = url.searchParams.get("remote-controller");
+
+if (remoteControllerId) {
+    console.log(`Remote controlling mode`);
+    const connectOptions = { }; // { host: 'localhost', port: 9000 }
+    const controller = new RemoteController(remoteControllerId, connectOptions);
+    controller.addEventListener(`open`, () => {
+        console.log(`Connected to the remote controller (${remoteControllerId})`);
+        controller.addEventListener(`pointermove`, onPointerMove);
+        controller.addEventListener(`pointerdown`, onPointerDown);
+        controller.addEventListener(`pointerup`, onPointerUp);
+        controller.addEventListener(`wheel`, onWheel);
+    });
+}
+
 const cursor = document.getElementById("cursor") as HTMLCanvasElement;
 cursor.width = cursor.clientWidth;
 cursor.height = cursor.clientHeight;
@@ -118,8 +136,8 @@ let rightColor = leftColor;
 
 let lastX = 0;
 let lastY = 0;
-canvas.addEventListener("pointerdown", e => {
 
+function onPointerDown(e: MouseEvent) {
     let x = e.offsetX;
     let y = e.offsetY;
 
@@ -136,20 +154,9 @@ canvas.addEventListener("pointerdown", e => {
     drawLine(x, y, x + 1, y + 1);
     lastX = x;
     lastY = y;
-});
+}
 
-canvas.addEventListener("pointermove", e => {
-    const x = e.offsetX;
-    const y = e.offsetY;
-    drawCursor(x, y);
-    if (mousePressed) {
-        drawLine(lastX, lastY, x, y);
-        lastX = x;
-        lastY = y;
-    }
-});
-
-canvas.addEventListener("pointerup", e => {
+function onPointerUp(e: MouseEvent) {
     let x = e.offsetX;
     let y = e.offsetY;
     let cell = cells.find(c => c.isHover(x, y));
@@ -161,15 +168,31 @@ canvas.addEventListener("pointerup", e => {
     }
 
     mousePressed = false;
-})
+}
 
-canvas.addEventListener("wheel", e => {
+function onPointerMove(e: MouseEvent) {
+    const x = e.offsetX;
+    const y = e.offsetY;
+    drawCursor(x, y);
+    if (mousePressed) {
+        drawLine(lastX, lastY, x, y);
+        lastX = x;
+        lastY = y;
+    }
+}
+
+function onWheel(e: MouseWheelEvent) {
     size -= Math.sign(e.deltaY);
     if (size < 1) size = 1;
     else if (size > 50) size = 50;
     drawCursor(e.offsetX, e.offsetY);
     e.preventDefault();
-});
+}
+
+canvas.addEventListener("pointerdown", onPointerDown);
+canvas.addEventListener("pointermove", onPointerMove);
+canvas.addEventListener("pointerup", onPointerUp);
+canvas.addEventListener("wheel", onWheel);
 
 function drawLine(x1: number, y1: number, x2: number, y2: number) {
     _drawLine(x1 % width, y1, x2 % width, y2, leftColor);

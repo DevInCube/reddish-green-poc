@@ -28,9 +28,55 @@ System.register("utils/Random", [], function (exports_1, context_1) {
         }
     };
 });
-System.register("main", [], function (exports_2, context_2) {
-    var cursor, cursorCtx, controls, controlsCtx, canvas, ctx, width, mousePressed, PaletteCell, padding, colors, cells, size, leftColor, rightColor, lastX, lastY;
+System.register("utils/remoteController", [], function (exports_2, context_2) {
+    var RemoteController;
     var __moduleName = context_2 && context_2.id;
+    return {
+        setters: [],
+        execute: function () {
+            RemoteController = class RemoteController {
+                constructor(id, options) {
+                    this.eventListeners = {};
+                    //
+                    const peer = new Peer(randomId(), options);
+                    const conn = peer.connect(id);
+                    conn.on('open', () => {
+                        this.__emit(`open`, {});
+                        //
+                        conn.on('data', (data) => {
+                            // console.log('Received', data);
+                            if (data.event) {
+                                this.__emit(data.event, data.data);
+                            }
+                        });
+                    });
+                    function randomId() {
+                        return Math.random().toString(36).substring(14);
+                    }
+                }
+                addEventListener(eventType, handler) {
+                    this.__ensureListeners(eventType);
+                    this.eventListeners[eventType].push(handler);
+                }
+                __emit(eventType, data) {
+                    this.__ensureListeners(eventType);
+                    for (const handler of this.eventListeners[eventType]) {
+                        handler(Object.assign({ preventDefault() { } }, data));
+                    }
+                }
+                __ensureListeners(eventType) {
+                    if (!this.eventListeners[eventType]) {
+                        this.eventListeners[eventType] = [];
+                    }
+                }
+            };
+            exports_2("default", RemoteController);
+        }
+    };
+});
+System.register("main", ["utils/remoteController"], function (exports_3, context_3) {
+    var remoteController_1, url, remoteControllerId, cursor, cursorCtx, controls, controlsCtx, canvas, ctx, width, mousePressed, PaletteCell, padding, colors, cells, size, leftColor, rightColor, lastX, lastY;
+    var __moduleName = context_3 && context_3.id;
     function drawExtraLines(ctx) {
         ctx.strokeStyle = "#bbb";
         ctx.lineWidth = 1;
@@ -65,6 +111,52 @@ System.register("main", [], function (exports_2, context_2) {
         ctx.strokeRect(width + width / 2 - 100 - 20, canvas.height / 2 - 20, 40, 40);
         ctx.strokeRect(width + width / 2 + 100 - 20, canvas.height / 2 - 20, 40, 40);
     }
+    function onPointerDown(e) {
+        let x = e.offsetX;
+        let y = e.offsetY;
+        let cell = cells.find(c => c.isHover(x, y));
+        if (cell) {
+            if (e.button === 0) {
+                leftColor = cell.color;
+            }
+            return;
+        }
+        mousePressed = true;
+        drawLine(x, y, x + 1, y + 1);
+        lastX = x;
+        lastY = y;
+    }
+    function onPointerUp(e) {
+        let x = e.offsetX;
+        let y = e.offsetY;
+        let cell = cells.find(c => c.isHover(x, y));
+        if (cell) {
+            if (e.button === 0) {
+                rightColor = cell.color;
+            }
+            return;
+        }
+        mousePressed = false;
+    }
+    function onPointerMove(e) {
+        const x = e.offsetX;
+        const y = e.offsetY;
+        drawCursor(x, y);
+        if (mousePressed) {
+            drawLine(lastX, lastY, x, y);
+            lastX = x;
+            lastY = y;
+        }
+    }
+    function onWheel(e) {
+        size -= Math.sign(e.deltaY);
+        if (size < 1)
+            size = 1;
+        else if (size > 50)
+            size = 50;
+        drawCursor(e.offsetX, e.offsetY);
+        e.preventDefault();
+    }
     function drawLine(x1, y1, x2, y2) {
         _drawLine(x1 % width, y1, x2 % width, y2, leftColor);
         _drawLine(x1 % width + width, y1, x2 % width + width, y2, rightColor);
@@ -93,8 +185,26 @@ System.register("main", [], function (exports_2, context_2) {
         }
     }
     return {
-        setters: [],
+        setters: [
+            function (remoteController_1_1) {
+                remoteController_1 = remoteController_1_1;
+            }
+        ],
         execute: function () {
+            url = new URL(window.location.href);
+            remoteControllerId = url.searchParams.get("remote-controller");
+            if (remoteControllerId) {
+                console.log(`Remote controlling mode`);
+                const connectOptions = {}; // { host: 'localhost', port: 9000 }
+                const controller = new remoteController_1.default(remoteControllerId, connectOptions);
+                controller.addEventListener(`open`, () => {
+                    console.log(`Connected to the remote controller (${remoteControllerId})`);
+                    controller.addEventListener(`pointermove`, onPointerMove);
+                    controller.addEventListener(`pointerdown`, onPointerDown);
+                    controller.addEventListener(`pointerup`, onPointerUp);
+                    controller.addEventListener(`wheel`, onWheel);
+                });
+            }
             cursor = document.getElementById("cursor");
             cursor.width = cursor.clientWidth;
             cursor.height = cursor.clientHeight;
@@ -153,58 +263,16 @@ System.register("main", [], function (exports_2, context_2) {
             rightColor = leftColor;
             lastX = 0;
             lastY = 0;
-            canvas.addEventListener("pointerdown", e => {
-                let x = e.offsetX;
-                let y = e.offsetY;
-                let cell = cells.find(c => c.isHover(x, y));
-                if (cell) {
-                    if (e.button === 0) {
-                        leftColor = cell.color;
-                    }
-                    return;
-                }
-                mousePressed = true;
-                drawLine(x, y, x + 1, y + 1);
-                lastX = x;
-                lastY = y;
-            });
-            canvas.addEventListener("pointermove", e => {
-                const x = e.offsetX;
-                const y = e.offsetY;
-                drawCursor(x, y);
-                if (mousePressed) {
-                    drawLine(lastX, lastY, x, y);
-                    lastX = x;
-                    lastY = y;
-                }
-            });
-            canvas.addEventListener("pointerup", e => {
-                let x = e.offsetX;
-                let y = e.offsetY;
-                let cell = cells.find(c => c.isHover(x, y));
-                if (cell) {
-                    if (e.button === 0) {
-                        rightColor = cell.color;
-                    }
-                    return;
-                }
-                mousePressed = false;
-            });
-            canvas.addEventListener("wheel", e => {
-                size -= Math.sign(e.deltaY);
-                if (size < 1)
-                    size = 1;
-                else if (size > 50)
-                    size = 50;
-                drawCursor(e.offsetX, e.offsetY);
-                e.preventDefault();
-            });
+            canvas.addEventListener("pointerdown", onPointerDown);
+            canvas.addEventListener("pointermove", onPointerMove);
+            canvas.addEventListener("pointerup", onPointerUp);
+            canvas.addEventListener("wheel", onWheel);
         }
     };
 });
-System.register("utils/imageData", [], function (exports_3, context_3) {
+System.register("utils/imageData", [], function (exports_4, context_4) {
     var almost256;
-    var __moduleName = context_3 && context_3.id;
+    var __moduleName = context_4 && context_4.id;
     function setPixelI(imageData, i, r, g, b, a = 1) {
         // tslint:disable-next-line:no-bitwise
         const offset = i << 2;
@@ -213,22 +281,22 @@ System.register("utils/imageData", [], function (exports_3, context_3) {
         imageData.data[offset + 2] = b;
         imageData.data[offset + 3] = a;
     }
-    exports_3("setPixelI", setPixelI);
+    exports_4("setPixelI", setPixelI);
     function scaleNorm(v) {
         return Math.floor(v * almost256);
     }
     function setPixelNormI(imageData, i, r, g, b, a = 1) {
         setPixelI(imageData, i, scaleNorm(r), scaleNorm(g), scaleNorm(b), scaleNorm(a));
     }
-    exports_3("setPixelNormI", setPixelNormI);
+    exports_4("setPixelNormI", setPixelNormI);
     function setPixelXY(imageData, x, y, r, g, b, a = 255) {
         setPixelI(imageData, y * imageData.width + x, r, g, b, a);
     }
-    exports_3("setPixelXY", setPixelXY);
+    exports_4("setPixelXY", setPixelXY);
     function setPixelNormXY(imageData, x, y, r, g, b, a = 1) {
         setPixelNormI(imageData, y * imageData.width + x, r, g, b, a);
     }
-    exports_3("setPixelNormXY", setPixelNormXY);
+    exports_4("setPixelNormXY", setPixelNormXY);
     return {
         setters: [],
         execute: function () {
@@ -236,8 +304,8 @@ System.register("utils/imageData", [], function (exports_3, context_3) {
         }
     };
 });
-System.register("utils/misc", [], function (exports_4, context_4) {
-    var __moduleName = context_4 && context_4.id;
+System.register("utils/misc", [], function (exports_5, context_5) {
+    var __moduleName = context_5 && context_5.id;
     function isVisible(elt) {
         const style = window.getComputedStyle(elt);
         return (style.width !== null && +style.width !== 0)
@@ -246,18 +314,18 @@ System.register("utils/misc", [], function (exports_4, context_4) {
             && style.display !== "none"
             && style.visibility !== "hidden";
     }
-    exports_4("isVisible", isVisible);
+    exports_5("isVisible", isVisible);
     function adjust(x, ...applyAdjustmentList) {
         for (const applyAdjustment of applyAdjustmentList) {
             applyAdjustment(x);
         }
         return x;
     }
-    exports_4("adjust", adjust);
+    exports_5("adjust", adjust);
     function getRandomElement(array) {
         return array[Math.floor(Math.random() * array.length)];
     }
-    exports_4("getRandomElement", getRandomElement);
+    exports_5("getRandomElement", getRandomElement);
     return {
         setters: [],
         execute: function () {
